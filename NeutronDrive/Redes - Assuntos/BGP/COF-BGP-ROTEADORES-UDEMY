@@ -1,0 +1,275 @@
+
+BGP - BORDER GATWAY PROTOCOL
+referencias adicionais(fora udemy):
+http://memoria.rnp.br/newsgen/9903/bgp4.html
+http://memoria.rnp.br/newsgen/9905/bgp4p2.html
+https://tools.ietf.org/html/rfc4271
+https://tools.ietf.org/html/rfc1771
+https://tools.ietf.org/html/rfc1105
+ftp://ftp.registro.br/pub/gter/gter17/Tutorial-BGP.pdf
+======================================================================
+
+TCP 179
+8 ATRIBUTOS(PELA CISCO 13)
+
+PATH VECTOR(DIFERENTE DO DISTANCE VECTOR)
+
+QUANTOS AS E NÃO QUANTO ROTEADORES)
+
+ATALIZAÇÕES INCREMENTAIS
+
+KEEP ALIVE(60 SEG) 3X
+
+HOLD TIME()
+
+na tabela do show ip bgp summary{
+	versão, mensagens trocadas e recebidas, versão da tabela de rotas
+	tempo de up ou down state( 0 indica estabilished)
+}
+
+router id (rever ospf) :
+obs na aula ta com ip publico ,mas NA PRODUÇÃO É USADO IP PRIVADO.
+tem 32 bits como ipv4
+COMO É DEFINIDO?
+1- MAIOR IP DE LOOPBACK
+SE NÃO
+2 - MAIOR IP DE INTERFACE FISICA
+
+ESTADOS DO BGP.
+comandos importantes:
+debug ip path detail
+debug ip bgp 
+
+IDLE -> BUSCANDO VIZINHO ALCANÇAVEL(neighbour)
+CONNECT -> tenho vizinho e estou realizando 3 way handshake(1 periodo heim?) -syn , syn ack,  ack end.
+OPEN(mensagem){
+	OPEN SENT -> mandando mensagem de abertura(PARAMETROS DO PEERING EX: VERSÃO, AS, CRIPTOGRAFIA, etc)
+	OPEN CONFIRM -> CONFIRMAÇÃO DO SENT
+}
+ACTIVE -> ATIVAMENTE MANDANDO OPEN SENT E ESPERANDO UM OPEN CONFIRM VALIDO.
+
+ESTABILISHED -> estabelecida sessão, dai menssagens:
+update -> atualizações incrementais, depois de envio de tabela de roteamento
+
+
+
+Divulgar rotas
+
+mesmo que estejasse feita a conexão , é necessário anuncar as rotas
+posso anunciar as rotas de outros roteadores tb
+
+notification -> notifica o vizinho se algo está errado
+keepalive(similar a mensagem hello do ospf) ->
+
+
+
+ANUNCIAR AS REDES!
+
+colocar as redes que tenho no roteador para aunicar no router bgp(AS REDES  INCLUSIVE AS DAS INTERFACES QUE POSSUO)
+
+NEXT ROPE SELF!
+
+para informar a um roteador diretamente onectado a mim, que não conhece as rotas para egp´s(bgp so distribui o que ele recebe e pronto!) que o proximo salto para chegar a outras rotas sou eu(roteador quem tem acesso a os outros)
+
+comando: neighbor <ip> next-hope-self
+
+!!!!!!Quando se fecha sessões EBGP basta anunciar as redes dos meus vizinhos o proximo salto sera a interface do roteador que quero alcançar
+
+
+!!!!!!Quando a sessão  é IBGP  preciso apontar o proximo salto para o roteador que é a saida do meu AS
+
+ate aqui foi tudo single hommed
+====================================================================
+
+UPDATE SOURCE
+ depois que se deconfigurar o neighbour das interfaces fisicas de cada vizinhança, refaço os neigbour apontando para as loopbacks com os respecivos remote-as e, depois disso, no neighbour dentro de router bgp, aplico o <neighbour [loopback do vizinho] update-source loopback [minha loopback(nome) ja estipulada no vizinho]>
+
+DEPOIS, NO ROUTER BGP AINDA:
+
+NEIGHBOUR <loopback do vizinho> ebgp-multihop <numero de saltos>
+
+DOS DOIS LADOS
+VAI APRENDER AS ROTAS ,MAS NÃO FECHOU O DUAL HOMMED
+
+rotas estaticas nos dois sentidos são necessárias
+
+
+AS-PATH
+
+Roteadores que recebem rota do mesmo AS descartam as rotas recebidas que os contenha para evitar LOOP
+
+para que ele receba
+no router BGP AS X : 
+
+neighbour X allow-in
+
+
+PEER GROUP(É CISCO)
+
+SERVE PARA AGRUPAR REGRAS PARA DETERMINADO GRUPOS DE VIZINHANÇAS
+
+ neighbor <NOME DO GRUPO> peer-group
+ neighbor <IP DO PEER> peer-group <NOME DO GRUPO>
+ neighbor <NOME DO GRUPO> allowas-in
+=============================================
+ATRIBUTOS DO BGP:
+
+
+
+WELL-KNOW:
+
+DISCRITIONARY(NÃO ESTÃO NA RFC)
+
+MANDATORIOS(NA RFC, ESTÃO EM TODO UPDATE):
+
+---------------
+OPCIONAIS():
+
+TRANSITIVOS
+SE ESTIVER COM FLAG ATIVA NO BGP IRÁ TRASITAR
+
+NÃO-TRASITIVOS
+
+SEM FLAG O BGP NÃO PROPAGARÁ.
+============================================
+
+
+
+
+@@@@ATRIBUTOS:
+
+----------------------------------------------------------
+#WEIGHT(CISCO):
+----------------------------------------------------------
+INFLUENCIA NA MELHOR ROTA
+
+NEIGHBOR <IP DO PEER> WEIGHT <VALOR>
+
+PARA LIMPAR O WEIGHT POR COMPLETO
+CLEAR IP BGP *
+
+---------------------------------------------------------
+#AGGREGATOR(SUMARIZAÇÃO)[TYPE CODE 7, OPCIONAL TRANSITIVO]
+---------------------------------------------------------
+atomic agregate(escolher um prefixo mais generico a um mais especifico)
+JUNTA PREFIXOS MENORES UM MAIOR, POR ONDE TODOS SAIRÃO(CIDR)
+
+
+Aggregate-address <rede> <mascara da sumarização>
+DO CLEAR IP BGP <AS de quem recebera> out ou in
+
+se quiser SO os sumarizados:
+Aggregate-address <rede> <mascara da sumarização> summary-only
+
+------------------------------------------------------------------
+#MED(MULTIEXIT DESCRIMINATOR)[TYPE CODE 4, OPCIONA NÃO TRANSITIVO(SO NO OUT)]
+-------------------------------------------------------------------
+
+PRIMEIRO
+CLIAR A REGRA]
+
+IP PREFIX-LIST <NOME> PERMIT <REDE+MASCARA DECIMAL> 
+
+ROUTE-MAP <NOME> PERMIT <MARCAÇÃO EM DECIMAL>{
+	MATCH IP ADDRESS PREFIX-LIST <NOME DA QUE FOI CRIADA>
+	SET METRIC <VALOR DA METRICA[QUANTO MAIOR, PIOR]>
+	EXIT
+}
+
+ATIVAR NO BGP ROUTER:
+
+NEIGHBOR <IP DO PEER> ROUTE-MAP <RP CRIADA> <SENTIDO, NO CASO SÓ OUT>
+
+----------------------------------------
+#LOCAL PREFERENCE(TYPE CODE 5[MANDATORY])
+----------------------------------------
+WELL KNOW DISCRICIONARY(TA NA RFC)
+UPDATE(TEM QUE ESTAR)
+
+FAZ COM QUE AS ROTAS DE SAIDA SEJAM DETERMINADAS
+
+CLIAR A REGRA]
+
+IP PREFIX-LIST <NOME> PERMIT <REDE+MASCARA DECIMAL> 
+
+ROUTE-MAP <NOME> PERMIT <MARCAÇÃO EM DECIMAL>{
+	MATCH IP ADDRESS PREFIX-LIST <NOME DA QUE FOI CRIADA>
+	SET METRIC <VALOR DA METRICA[QUANTO MAIOR, PIOR]>
+	EXIT
+}
+
+ATIVAR NO BGP ROUTER:
+
+NEIGHBOR <IP DO PEER> ROUTE-MAP <RP CRIADA> <SENTIDO, NO CASO SÓ OU
+
+
+---------------------------------------------------------------
+#AS-PATH(TYPE CODE 2, WELL KNOW DESCRITIONARY, NO UPDATE, NA RFC)
+----------------------------------------------------------------
+
+
+NO BGP IMPORTA O NUMERO DOS AS NÃO O NUMERO DE ROTEADORES
+
+AS-PATH MANIPULA O CAMINHO PELOS AS
+
+SET AS-PAth PREPEND <NUMERO DE VEZES QUE O AS SERA REPLICADO>
+
+
+---------------------
+#FILTRAR ANUNCIO DE AS
+----------------------
+FILTRAR TRAFEGO
+
+COMO NÃO SER TRANSITO
+
+QUEM APLICAR A REGRA NO SENTIDO OUT, IRA DETERMINAR AOS OUTROS APENAS PARA RECEBER INFORMAÇÕES DE SEU AS, E DO QUE ELE PROPAGAR.
+COMANDO:
+IP AS-path ACCess-list 1 PERmit ^$(SIMBOLOS NO FIM SÃO UMA EXPRESÃO REGULAR)
+
+POS CRIADA, ROUTER BGP <AS>:
+NEIGhbor <VIZINHANÇA> FILTER-list <NUMERO DA ACCESS LIST> OUT
+
+
+--------------------------------------------------------
+#ORIGIN(IGP,EGP,INCOMPLETE)[TYPE CODE 1, MANDATORY, RFC, UPDATE]
+--------------------------------------------------------
+
+IGP - PROTOCOLO INTERNO
+
+EGP - EXTERNO(POREM NÃO EXISTE MAIS)
+
+INCOMPLETE - GERADA POR REDISTRIBUIÇÃO(OSPF, IGRP, ROTA ESTATICA ETC)
+
+
+
+------------------------------------------------------------
+#SELECIONAR MELHOR ROTA
+------------------------------------------------------------
+
+PREFERENCIALMENTE
+
+1 WEGHT(CISCO)
+
+2 LOCAL PREFERENCE
+
+3 ROTA ORIGINADA( N PROPRIO AS VAI SEMPRE SER PREFERIDA DO EBP)
+
+4 AS PATH
+
+5 ORIGIN CODE(IGP<EGP<INCOMPLETE)
+
+6 MED(TROCA ENTRE AS)
+
+7  ebgp à (quando a rota vier de fora) IBGP 
+
+8  CAMINHO PELO IGP MAIS PROXIMO 
+
+9 ROTAS MAIS ANTIGAS EBGP
+
+10 ROUTER ID DO VIZINHO BGP
+
+11 CAMINHO COM MENO ENDEREÇO IP DO VIZINHO.
+
+
+
+

@@ -1,0 +1,246 @@
+R1
+
+
+interface FastEthernet0/0
+ description REDE CINZA
+ ip address 10.13.0.1 255.255.255.252
+ ip ospf 10 area 30
+exit
+interface FastEthernet1/0
+ description REDE VERMELHA
+ ip address 10.12.0.1 255.255.255.252
+ ip ospf 10 area 20
+exit
+interface FastEthernet0/1
+ description REDE BRANCA
+ ip address 10.145.0.1 255.255.255.0
+ ip ospf 10 area 0
+exit
+interface Loopback0
+ ip address 10.0.0.1 255.255.255.0
+ ip ospf 10 area 0
+ ip ospf network point-to-point
+exit
+router ospf 10
+ router-id 10.0.0.1
+ area 20 virtual-link 20.0.0.1
+ area 30 stub no-summary
+ area 30 range 30.0.0.0 255.255.248.0
+
+R2
+
+
+R2
+
+interface FastEthernet0/0
+ description REDE AMARELA
+ ip address 10.26.0.1 255.255.255.252
+ ip ospf 20 area 60
+exit
+interface FastEthernet2/0
+ description AREA VERMELHA
+ ip address 10.12.0.2 255.255.255.252
+ ip ospf 20 area 20
+exit
+interface Loopback0
+ ip address 20.0.0.1 255.255.255.0
+ ip ospf 20 area 20
+ ip ospf network point-to-point
+end
+exit
+router ospf 20
+ area 20 virtual-link 10.0.0.1
+
+R3
+
+
+R3
+
+interface Loopback0
+ ip address 30.0.0.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface Loopback1
+ ip address 30.0.1.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface Loopback2
+ ip address 30.0.2.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface Loopback3
+ ip address 30.0.3.1 255.255.255.0
+exit        
+interface Loopback4
+ ip address 30.0.4.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface Loopback5
+ ip address 30.0.5.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface Loopback6
+ ip address 30.0.6.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface Loopback7
+ ip address 30.0.7.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 30 area 30
+exit
+interface FastEthernet0/0
+ description REDE CINZA
+ ip address 10.13.0.2 255.255.255.252
+ ip ospf 30 area 30
+
+
+router ospf 30
+ area 30 stub no-summary
+
+R4
+
+
+R4
+
+interface Loopback0
+ ip address 40.0.0.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 40 area 0
+exit
+interface FastEthernet0/0
+ description REDE BRANCA
+ ip address 10.145.0.4 255.255.255.0
+ ip ospf 40 area 0
+
+R5
+
+
+R5
+
+interface Loopback0
+ ip address 50.0.0.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 50 area 0
+exit
+interface FastEthernet0/0
+ description REDE BRANCA
+ ip address 10.145.0.5 255.255.255.0
+ ip ospf 50 area 0
+
+R6
+
+
+R6
+
+interface Loopback0
+ ip address 60.0.0.1 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 60 area 60
+exit
+interface FastEthernet0/0
+ description REDE AMARELA
+ ip address 10.26.0.2 255.255.255.252
+ ip ospf 60 area 60
+
+
+
+
+OBS labs:
+
+
+
+
+Stub area tem que ser configurada nas duas pontas
+
+
+virtual-link tem que ser configurado de onde ele vai  e o TRANSITO até o outro ponto.
+
+
+
+
+
+
+
+
+Stub area tem que ser configurada nas duas pontas
+
+virtual-link tem que ser configurado de onde ele vai  e o TRANSITO até o outro ponto.
+
+mtu tem que ser igual nas interfaces!
+
+hello times e dead time tem que ser iguais!!!!!
+
+senhas diferentes cagam!!!
+    
+areas e tipos tem que ser iguais!!!
+
+
+
+===========================================================
+
+
+eleições de dr e bdr
+
+1 priority
+2 numeral(pode ser a loopback ou a fisica)
+3 priority 0 nunca sera eleito!
+
+
+balanceamento:
+padrão é 4!
+
+custos nas interfaces tem que ser iguais!!!
+
+
+para numero maximo de caminhos:
+
+router ospf <n° processo>{
+
+maximum paths <numero de caminhos>
+
+}
+
+
+autenticantion(dos dois lados!)
+
+
+Sem hash:
+router ospf <n° processo>{
+
+area <numero> autenticantion{
+int <tipo e numero>{
+
+ip ospf autenticantion-key <senha>
+
+    }
+  }
+}
+
+Com hash:
+
+router ospf <n° processo>{
+
+area <numero> autenticantion message-digest {
+int <tipo e numero>{
+
+ip ospf message-digest-key <chave[numero]> md5 <senha>
+
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+

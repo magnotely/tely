@@ -1,0 +1,147 @@
+###LacP/Etherchannel###
+
+link importante:
+
+https://www.cisco.com/c/pt_br/support/docs/lan-switching/etherchannel/12023-4.html
+
+
+
+
+||| Agregação de portas|||:
+
+Juntar, reunir portas para atingir uma maior banda = Agregação de Links.
+
+Agregar portas em Switches Ethernet.
+
+Etherchannel(canal Ethernet).
+
+
+
+#################################################################
+Com dois links redundantes o spanning tree bloqueará um para impedir
+Loop.
+
+Etherchannel permite que spanning tree trate dois links fisicos como uma porta logica(porta virtual)
+#################################################################
+
+
+#################################################################
+Desta agregação, supondo que 5 portas sejam usadas, cada uma com 100 mb, totalizará um Etherchannel de 500 mb, se uma delas cair, o link será reduzido para 400 mb, quando ela voltar, novamente ele voltará ater 500 mb
+#################################################################
+
+
+Terminologia:
+
+Agregação de portas, com o comando Channel-group (grupo de canal).
+
+Assim cria-se uma interface unica, chamada Port-Channel(porta do canal).
+
+Todas as portas devem ter o status operacional igual e configuração idêntica.
+
+###Balanceamento de carga###:
+
+Etherchannel carrega saldos de carga em todas as postas físicas do grupo Etherchannel
+
+!!!importante!!!
+
+Quadro ethernet do Etherhanel não é fragmentado:
+
+O quadro e enviado por uma porta selecionada e atravessa o link intacto.
+
+#################################################################
+Protocolo do conduíte:
+
+PAgP == lacP ? Kind of.
+
+PAgP : 
+
+1.permite que o switch descubra a capacidade de cada porta usada no Etherchannel
+e aciona com segurança interfaces com mesma configuração;
+
+2. ele que transmite e recebe mensagens de todas as interfaces do pacote Etherchannel;
+
+PAgP( proprietário cisco, lacP não).
+
+O spanning tree* reflete o  aumento da largura de banda fornecido pelo etherChannel
+
+
+*Spanning Tree Protocol (referido com o acrónimo STP) é um protocolo para equipamentos de rede que permite resolver problemas de loop em redes comutadas cuja topologia introduza anéis nas ligações, auxiliando na melhor performance da rede.
+
+O protocolo STP possibilita a inclusão de ligações redundantes entre os computadores, provendo caminhos alternativos no caso de falha de uma dessas ligações. Nesse contexto, ele serve para evitar a formação de loops entre os comutadores e permitir a ativação e desativação automática dos caminhos alternativos.
+
+Para isso, o algoritmo de Spanning Tree determina qual é o caminho mais eficiente (de menor custo) entre cada segmento separado por bridges ou switches. Caso ocorra um problema nesse caminho, o algoritmo irá recalcular, entre os existentes, o novo caminho mais eficiente, habilitando-o automaticamente. O nome deriva do algoritmo spanning tree em teoria dos grafos.
+
+Em 2012 IEEE 802.1aq foi aprovado como um padrão para substituir 802.1d mais velho, 802.1w e protocolos 802.1s.
+
+***Shortest Path Bridging (SPB), especificado no standard IEEE 802.1aq, é uma tecnologia para redes de computação que permite simplificar a criação e configuração das mesmas, enquanto permite routing por múltiplos caminhos.
+
+(essa parte do STP, é legada)
+
+
+
+
+Configuração etherchanel
+
+Switch(config)# interface range fa0/1-4(alcance ou uma unica interface)
+
+Switch(config-if)# channel-group[1-6] mode[auto|desirable{ativa PAgP}| on| ative|passive{ativa LAcP)
+
+
+Verificar etherchannel:
+
+Switch# show interface etherchannel
+Switch# show etherchannel [sumary|load balance| port-channel]
+
+
+Switch0# show etherchannel
+
+status group = l2(layer 2, ethernet)
+ports =2(maximum 8),
+channel = maximum 1
+protocol = PAgp
+
+
+
+Switch0# show etherchannel sumary
+
+group(1)  (P)Po1(SU){S - referente a camada e U - uso e P - portas que estão no canal} protocol (Pagp) Fa0/1(P) |Fa0/2(p)
+
+
+Switch0# show ethernet load-balance
+
+mostra o estado operacional do balanceamento de carga(etherchannel, src-mac{mac de origem})
+
+trafego transmitido fora do cannal sera pelo mac(no quadro dele) passando por uma das portas do etherchannel
+
+
+Switch0# show ethernet port-chanel
+tempo de existência do canal
+numero de portas envolvidas e interface ou slot logico
+estado da porta
+protocolo
+detales das portas e a porta que carrega o quadro no caso FA0/1
+
+LEMBRANDO, MESMO POR SRC-MAC se a pota elencada cair o quadro psssará pela outra.
+
+Switch0# show interface etherchannel
+
+troubleshoot
+
+verifique se as portas em cada ponta estão com a mesma configuração e posterior o mesmo com o etherchanel. não seja burro, verifique(esse  conselho serve p tudo kkkkk)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

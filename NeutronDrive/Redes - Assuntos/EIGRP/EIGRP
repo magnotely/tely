@@ -1,0 +1,171 @@
+###EIGRP###
+https://www.cisco.com/c/pt_br/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/13669-1.html#intro
+https://www.youtube.com/watch?v=bs3hCeKP7GY&t <- AULA 1
+https://www.youtube.com/watch?v=Sbq9Zot0Qa0 <- AULA 2
+https://www.youtube.com/watch?v=IL1D9ODN0nA <- AULA 3 
+https://www.youtube.com/watch?v=g03FAqFQ75Q <- (à fazer)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+EIGRP(Enhanced Interior Gateway Routing Protocol)
+
+#Proprietario Cisco[aberto]
+
+#Não mante uma tabela topologica completa;
+#Constroe suas tabelas baseado nas rotas informadas pelos vizinhos diretos;
+#Multicast 224.0.0.10;
+#Contagem de saltos = 255,default 224;
+#Protocolo hibrido:
+
+#Usa largura de banda e atraso de lina(delay of the line);
+para métrica(outros parâmetros:confiabilidade[realibility],carga[load],MTU);
+#Classless;
+#Suporte a autenticação;
+#Multiprotocolo camada L3(IPV4,IPV6);
+#Utiliza algoritmo Dual(Diffusing Update Algorithm);
+
+----------------
+#Tabelas EIGRP:
+----------------
+
+- Neighbor Table(diretamente conectados);
+- Topology Table(formada pelas informações que vizinhos[Routing by Rumour] disponibilizam[so melhores rotas]){
+#show ip eigrp topology <- apenas melhores rotas;
+#show ip eigrp topology all(tudo);
+}
+- RIB(Rounting Information Base) - rotas com melhores para cada rede remota
+que tão na Topology Table, ficam na RIB depois do Dual;
+- Ate 4 rotas para o mesmo destino com o mesmo custo;
+- Cada Roteador vizinho tem uma Topology Table;
+
+--------------------------------
+Dual(Diffusing Update Algorithm):
+--------------------------------
+
+- Feasible distance(FD): se existir varias rotas para um mesmo destino(vizinho) a com menor FD será escolhida;
+- Reported Distance(RD)/Advertised Distance(AD): metrica do vizinho para uma rede remota;
+- Successor: rota com menor FD.Escolhida como melhor rota para rede remota;
+- Feasible successor(FS):rota alternativa a Successor, se existir fica na tabela e so é acionada se a principal(Successor) cair;
+- Feasibility condition(FC): condição para saber se a FS pode ser usada;
+
+Ex:
+
+
+        [S]=============>[D]    [S]========>[D]
+                200              30   | 
+        {r1}¹------------{r2}²--------| 192.168.0.0/24
+                                      |  
+
+² #Informa a r1 que chega a rede desejada com metrica de 30;
+¹ #recebe de r2 isso e conclui que a metrica dele sera:
+- 200(distancia de r1 p/ r2)+30(distancia de r2 p/ rede 192) = 230;
+@Successor: rota para 192 será via r2;
+@Feasible successor: não existe, ja que não existe outra rota;
+
+----------------------
+Feasibility Condition:
+----------------------
+ ==>!
+ {r1}*    <==³
+ |   \ 100     <==²        <==¹
+ |    \       100        25
+ |50   {r3}---------{r4}----| 192.168.0.0/24        
+ |    /
+ |   / 100
+ {r2}*    <==³
+ ==>!
+
+¹ - r4 dias a r3 que para 192 por ele o FD é 25(o RD dele é 25);
+² - r3 sabe que para chegar a rede desejada o FD dele é 100(metrica até r4)+25(metrica de r4 ate a rede);
+³ - r3 propaga para r1 e r2 que dele para rede 192 o RD será de 125(100 dele p/ r4 + 25 de r4 até a rede);
+* - r1 e r2 forão isso entre si, deixando a metrica cumulativa, adicionado a distancia de um para o outro
+propagando entre si(no caso r1 dira a r2 que a FD é 225 um para o outro acumulando a distancia a metrica de 50
+assim :
+de r2 via r1 para rede desejada metrica será: 225+50 =275(o inverso será o mesmo valor);
+! - r1 e r2 propagarão para r3 que por eles o rd é 275, r3 recebera isso mas usará sua metrica ja que é menor;
+
+? quando uma rota pode ser backup(FS) sem que a rede dê loop?
+
+Regra geral:
+
+Reported Distance(RD) < Feasible distance(FD) da rota PRINCIPAL(Successor) para a rede desejada;
+
+---------------
+Metricas EIGRP:
+---------------
+
+# Metrica composta de pode usar ATÉ 5 elementos(letra K){
+Banda(bandwidth)[k1],carga(load)[k2],delay[k3],confiabilidade(realibility)[k4] e MTU[k5]
+
+formula(a vera): M = 256*((k1*bw)+(k2*bw)/(256-load)+k3*delay)*(k5/(realibility+k4)));
+
+!MAS NA PROVA!: M = 256*(BW+delay);
+}
+
+# Intervalo Hello:
+ - 5s em link broadcast(ethernet) e p2p;
+ - 60s em link non-broadcast multiacesso(NBMA) como frame-relay;
+
+# Dead Interval: 3x o valor do Hello;
+
+
+-------------------
+PONTOS CHAVE EIGRP:
+-------------------
+
+*active-state = deu merda;
+*¹passive-state = deu bom(sem recalculo pelo algoritmo Dual);
+
+! - Se a rota principal(Successor) cair, a rota backup(fs)[se existir] é imadiatamente instalada na Rounting Table;
+! - Se não existir Feasible Successor(FS) a rota Successor será colocada em active-state* e ele enviará uma Query aos vizinhos perguntando se alguém conhece outra rota para rede desejada;
+! - Quando tudo está normal, o EIGRP fica em passive-state*¹;
+
+----------------------
+Balancemento de Carga:
+----------------------
+
+
+#EIGRP balanceira entre 4 links de mesmo custo(e custos desiguais TB, diferente do OSPF);
+#Parametro Variance determina qual criterio é adotado para instalar rota alternativa na RIB;
+#Variance é um parametro arbitrário!;
+Segue:
+
+     5      5
+{r1}¹---{r2}---|
+ |  \          |
+ |   \ 20      | 
+ |    \      6 |192.168.0.0/24
+  \    \{r3}---| 
+   \30     7   |
+    \{r4}------| 
+
+@Variance = 3;
+
+
+¹ - Topology Table(para chegar a rede 192){
+Via r2 => RD: 5 | FD: 10 <- Successor!
+Via r3 => RD: 6 | FD: 26 <- Feasibility Successor
+Via r4 => RD: 7 | FD: 37 <- Feasibility Successor
+}
+
+Assim, na RIB:
+
+ - Via r2 apenas;
+ - Via r3²
+
+² - Todas as rotas Feasibility Successor(FS) que tenham um Feasible Distance(FD) MENOR OU IGUAL ao resultado
+de Variance x FD(de Successor) , seão instaladas na RIB, assim:
+
+3(Variance) x 10(FD do Successor) = 30;
+FD de r2 é menor que o resultado da conta, então será instalado na RIB;
+
+Obs: se fosse de vontade a rota via r4 fosse instalada na RIB, simplesmente mudava-se o Variance para um valor
+que pleiteasse as duas, como 4 por exemplo(4 x10 = 40);
+
+--------------------
+Configuração Básica:
+--------------------
+*todos os roteadores de uma mesma rede devem ter o mesmo AS.
+
+#Router eigrp <numero do AS(entre 1 - 65535)*>{
+network <ip da rede>
+
+

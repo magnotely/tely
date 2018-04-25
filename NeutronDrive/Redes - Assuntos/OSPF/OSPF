@@ -1,0 +1,320 @@
+####OSPF####
+https://ccnav6.com/
+Apostila CCNA.pdf
+https://tools.ietf.org/html/rfc1131
+https://www.youtube.com/watch?v=78JvPxMU3Qc&t <- aula 1
+https://www.youtube.com/watch?v=14kTn-6qbZ0 <- aula 2 
+https://www.youtube.com/watch?v=497neyJPboA <- aula 3(lab p/1)
+https://www.youtube.com/watch?v=cMc728rbRdc <- aula 4(lab p/2)
+https://www.youtube.com/watch?v=8BUUtJyE2BM&t <- aula 5(lab p/3)
+https://www.youtube.com/watch?v=AZCDSwPfRQ8&t <- aula 6(lab p/4)
+https://www.youtube.com/watch?v=fGaQzUew7Hw <- aula 7(lab p/5)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+=======================
+Open Short Path First:
+=======================
+
+# - Considera Largura de Banda(métrica);
+# - Envia seus updates via multicast(224.0.0.5 & 224.0.0.6);
+# - Atualizações incrementais(não o full-route);
+# - Menor tempo de convergência;
+  
+ 
+----------
+Area OSPF:
+----------
+
+@ Permite hierarquização da rede por meio de divisão de dominios de rede(Areas);
+@ Usa para controlar como as informações de roteamento compartilhadas na rede;
+@ Trafego é coordenado pelo ABR(Area Border Router);
+@ Menos impacto na cpu(segmentação em Areas);
+
+    Area 0 (backbone, area de transito){
+    Todas as outras areas se conecta a ela;
+    caso não passe na Area 0 , criar um Virtual
+    link(tunel) "enganando" o OSPF, fazendo-o pensar que
+    esta passando na area.
+    }
+
+------------------
+Tipos de Routers:
+------------------
+
+  $  Internal router(possui suas interfaces numa unica area);
+  $  Backbone router(Internal Router contido na Area 0);
+  $  ABR(Roteador de fronteira, pelo menos uma interface na Area 0);
+  $  ASBR(Autonomous System Border Router(router que redistribui as rotas a outros roteadores);
+
+---------------------
+Informações trocadas:
+---------------------
+
+>Na mesma Area -> Intra-area Routes;
+>Em areas diferentes -> Inter-area Routes(Summary,Internacinal);
+>Em area fora da Area 0 -> Virtual Link;
+
+>External-Routes(outro Protocolo, ex:RIP) -> ASBR; 
+
+-------------
+Tabelas-OSPF:
+-------------
+# - Neighbour Table{
+
+Conexões adjacentes;
+
+ex: bairro
+
+}
+
+
+# - Topology/Link-State/Database Table{
+
+Visão completa da Rede(uma POR Area);
+
+ex:Mapa cidade
+
+}
+
+
+# - Routing Information Base(RIB){
+
+Só as melhores Rotas;
+
+ex:Waze(considera métrica)
+
+}
+
+!OSPF!
+
+Suporta balanceamento e carga entre ATÉ 6 rotas de igual custo para uma mesma rede(Cisco padrão é 4);
+
+----------------
+Tipos de Pacote:
+----------------
+
+@Hello -> responsavel por descoberta de vizinhos{
+
+ - em redes p2p e Broadcast são enviados a cada 10s.
+ - em redes non-broadcast a cada 30s.
+ - 4x sem recener Hello = Dead Interval[vizinhos inativo e rotas para ele descartadas]
+ - Hello transporta série de informações, se inconsistente em informações, vizinhança não é formada;
+ - Area-ID:interfaces devem permanecer a MESMA AREA, SUB-REDE E MÁSCARA;
+ - Autenticação: se sim, mesma senha;
+ - Hello & Dead Interval tem que ter o mesmo valor;
+ - Stub-Area-Flag: te que possuir o mesmo valor nas areas;
+}
+
+@Database Descriptor(DBD) -> verifica se a tabela topologica(LSDB) estão sincronizadas{
+
+ - Router de mesma AREA tem que ter a mesma tabela;
+
+ - Link-State Request(LSR) -> ao receber um DBD e verificar que não tem alguma daquelas rotas, envia um pacote LSR para o vizinho solicitando info detalhada;
+
+ - Link-State Update(LSU) -> depois de receber LSR o router envia a quem pediu as informações;
+
+ - LSAck -> confirma recebimento de alguns pacotes(não os Hello);
+}
+
+
+-----------
+Sequencia:
+-----------
+
+Downstate -> R1-Hello(Router-ID*) -> R2(coloca R1 na lista de vizinhos);
+
+R2-Hello(Router-ID*) -> R1(coloca R2 na lista de vizinhos);
+
+#Iniciado InitState#
+
+Depois:
+
+Inicia o #TwoWayState#
+
+
+Maior Router-ID(Master) dos dois começa a pedir os pacotes primeiro, o menor espera(Slave);
+
+#ExStart#
+
+R2-manda topologia pelo DBD(LSDB) -> R1
+
+R1-manda topologia pelo DBD(LSDB) -> R2
+
+#ExChange#
+
+R2-Ack -> R1
+
+R1-Ack -> R2
+
+#Loading#
+
+R2-LSR -> R1
+
+R1-LSU -> R2
+
+R2-Ack - R1
+
+#FULL#
+
+End.
+
+Obs:
+
+*Maior ip das Loopbacks, se não existirem, sera das Interfaces Reais.
+
+---------------
+Tipos de Rede:
+---------------
+
+@Point-to-Point(p2p):
+
+ # Não se faz necessária a eleição de DR/BDR(dois roteadores falando OSPF);
+
+@Rede Multiacesso(Broadcast):
+
+ # Elege um DR(Designed Router) em redes multiacesso(ex: Ethernet) e outro Router como BDR(Border Designed Router(é assim que se diminui as adjacências);
+
+ # Calculo de adjacências : (n*(n-1))/2; onde n é o numero de Routers;
+
+ # Pode-se resolver com um sw-l2(concentrador ?){
+
+ - Router que tiver maior prioridade(valor padrão é 1) é eleito o DR, caso empate, maior Router-ID ganha e o segundo maior é eleito o BDR;
+
+ - Eleitos usam o endereço de Multicast;
+}
+
+ # Após eleição, todos encaminharão pacotes para o DR en vez de cruzarem pacotes entre si(incusive o BDR);
+
+@Rede Non-broadcast:
+
+ #Frame-Relay{
+
+ - NBMA(Non-broadcast Multiaccess) -> demanda configuração de DR/BDR manualmente(Neighbor)
+
+ - Point-to-Multipoint ->  não exige DR/BDR.
+}
+
+-------------------------------------
+Tipo de LSA(Link-State Advertisement:
+-------------------------------------
+
+ #Tipo-1 -> Qualquer router OSPF origina e envia apenas para vizinhos DE UMA MESMA Area;
+
+ #Tipo-2 -> Originado por DR(só em multiacesso). Só na mesma Area;
+
+ #Tipo-3 -> Originado por um ABR -> Network-link-Summary.
+
+ #Tipo-4 -> Originado por um ASBR(External-Routes);
+
+ #Tipo-5 -> External-LSA - External-Routes ao OSPF;
+
+------------------- 
+Tipos de Areas OSPF:
+--------------------
+
+ #Standard Area: areas "normais"(inclui a 0);
+
+ #Stub-Area(area sem saida,só tem uma) -> Recebe dos ABR rotas default e LSA-3 contendo rotas internas sumarizadas[NÃO CONTEM router ASBR!]
+
+ #Totally-Stubby-Area(totalmente sem saida) -> so recebe rota padrão;
+
+ #Not-So-Stubby-Area(NSSA) -> permite ASBR em area stub(cisco).Permite passagem por LSA-7(gerado por ASBR).[não recebe rota default se não for configurada manualmente]
+
+
+
+--------------------
+Métrica(custo) OSPF:
+--------------------
+
+ #IOS utiliza largura de banda cumulativa das interfaces de saida do router para rede de destino como valor do custo.Quanto mais banda, menor o custo{
+
+ - Calculo: 10^8/larg.banda.
+ - Fastethernet(100Mbps) = custo 1;
+ - Gigabitethernet(1Gbps) = custo 0.1(mas por uma limitação, todas as interfaces, 100M,1G,10G, tem o mesmo custo: 1);
+ - Custo é acrescido a cada salto!;
+ - Para corrigir isso{
+}
+ - Feita a alteração acima, é necessário replica-la em todos os roteadores;
+}
+
+-----------------
+Configuração OSPF:
+-----------------
+
+
+#comandos:
+
+conf t
+router ospf <N° processo(entre 1 - 65535)>{
+network <ip da rede> <wildcard> area <n° da area>
+}
+
+
+#modo "novo"(não entendi):
+
+conf t
+router ospf <N° processo(entre 1 - 65535)>
+exit
+interface <n° interface>{
+ip ospf <N° processo> area <n° da area>
+}
+
+#troubleshoot[comandos]:
+
+show ip [route|protocols]
+show ip ospf border-routers
+show ip ospf interface
+show ip ospf virtual-links
+show ip ospf neighbor
+
+#troubleshoot[diagnostico & causas]{
+
+ - problema de adjacencia => inconsistencia no pacote Hello;
+ - senhas diferentes na autenticação;
+ - Hello & Dead diferentes nos roteadores;
+ - MTU´s diferentes nas interfaces;
+ - Areas configuradas diferentes em roteadores de mesma area;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

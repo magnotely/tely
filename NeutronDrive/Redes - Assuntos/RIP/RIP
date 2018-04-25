@@ -1,0 +1,187 @@
+###RIP###
+https://tools.ietf.org/html/rfc1058
+https://tools.ietf.org/html/rfc1723
+https://www.youtube.com/watch?v=ltybLm9WgrE <- Rot Dinamico & Rip
+https://www.youtube.com/watch?v=GrlN7qhvwVA <-Rip Lab
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Roteamento Dinamico
+
+utiliza protocolo de roteamento pra mapear a rede e automatizar a tabela de roteamento.
+
+vantagens: simplifica cofiguraçao
+viavel em rede de medio e grande
+desvantagem:
+utiliza largura de banda e cpu
+
+tipos:
+
+RIP(Routing Information Protocol)
+
+OSPF(Open Shortest Path First)
+
+EIGRP(Enhanced Interior Gateway Routing Protocol)
+
+Categorias:
+
+IGP(interior gateway protocol) -> Pertencentes a mesmo AS
+
+EGP(exterior Gateway Protocol) -> Pertencentes a AS diferentes.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+protocolos diferentes, metricas diferentes.
+
+Metrica: resultado de calculo matemático executados pelos protocolos sobre informações coletadas das rotas que chegam ate eles encaminhadas pelos roteadores vizinhos
+
+protocolo escolhe a melhor rota
+
+caso caia a melhor usará a back up
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Falhas:
+quando a rota deixa de existir ::
+queda de interface;
+distancia administrativa menos doutra;
+remoção nas atualizações pelo protocolo;
+remoção manual;
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Classificação:
+
+Distance Vector:
+
+utiliza a contagem de saltos, quanto menos, melhor.
+simples e limitado
+ex: RIP
+
+PROBLEMAS:
+ELEVADO TEMPO DE CONVERGENCIA(PEGAR ROTA DE BACK UP)
+ATUALIZAÇÕES INCONSISTENTES NAS TABELAS DE ROTEAMENTO(DEVIDO A LENTIDÃO DE CONVERGENCIA),causando ROUTING LOOPS(atéeee o ttl não acabar)
+
+como inibir isso acima?
+Maximum hop count:
+contagem maxima(15)
+
+horizonte dividido(Split horizon)
+atualização não pode ser encaminhada na mesma interface que recebi a rede
+
+triggered updates(flash updats e route poisoning*:
+assim que inacessivel o roteador afetado dispara um update imediato para os vizinhos
+anunciando essa rota com uma metrica "infinita" impossivel de alcançar.*
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+R-I-P:
+
+1-DISTANCE VECTOR;
+II-TEM TRÊS VERSÕES;
+      VER-1 :
+      VER-II :
+      RIPNG(IPV6):
+
+EM TODAS AS VERSÕES ENCAMINHA SUA TABELA DE ROTEAMENTO COMPLETA A CADA 30 SEG.
+NÃO FAZ VIZINHA-ÇA!!!
+
+METRICA: CONTAGEM DE SALTOS(MAXIMO 15)
+
+TIMERS(CORDENA OS INTERVALOS NOS QUAIS ALGUMAS AÇÕES SÃO TOMADAS, MANTEM INTEGRIDADE):
+
+UPDATE TIMER(INTERVALO DO UPDATES DE ROTEAMENTO) => RIP =30S;
+
+INVALID TIMER(DEPOIS DO INTERVALO, ROTA É COLOCADA EM HOLDDOWN) = RIP = 6X30S = 180S.
+
+HOLDDOWN TIMER(PREVEM CONTRA MUDANÇA REPENTINA DE INFORMAÇÕES DE ROTAS)
+    O ROTEADOR VAI MANTER ESSA ROTA NA SUA TABELA ATE QUE O FLUSH TIMER ASSOCIADO EXPIRE, MAS MARCA ELA COMO "PROBABLY DOWN". DURANTE ISSO, IPDATE PRA ELA SERA IGNORADO = 180S.
+
+FLUSH TIMER(POSTERIOR TODOS ESSES CICLOS, ROTE É RETIRADA DA TABELA) = 240S(4 MIN). 
+
+RIP-1:
+
+CLASSFUL(NO VLSM N0 CIDR)
+
+BROADCAST PERIODICO E MANDA SUA TABELA TODA!(CONSOME MUITA BANDA).
+
+COMANDOS BASICOS:
+
+CONF T
+
+#ROUTER RIP
+
+#NETWORK <REDE QUE QUERO DIVULGAR>
+
+SÓ;
+
+PARA NÃO PROPAGAR PARA INTERFACES QUE NÃO QUERO:
+
+#PASSIVE-INTERFACE <INTERFACE> <- NÃO ENVIA O UPDATE RIP NESSA INTERFACE.
+
+EM REDES DESCONTIGUAS(REDES CLASSFUL CONECTADAS POR UMA OUTRA CLASSFUL DIFERENTE):
+
+RIP-V1 N-Ã-0 F-U-N-C-I-O-N-A, vai achar que são da mesma rede, rip-v1 não considera mascara no update.
+
+
+RIP-II:
+
+SUPORTA MASCARAS VARIAVEIS(CLASSLESS)
+
+SUPORTE A AUTENTICAÇÃO(MUDA BROAD PRA MULTICAST[224.0.0.9])
+
+FAZ DESCARTE NA CAMADA 3
+
+CONF DE KEY CHAIN(TEM QUE FAZER EM TODOS OS ENVOLVIDOS):
+
+#ROUTER RIP{
+VERSION 2
+NETWORK <REDE>
+}
+EXIT
+
+KEY CHAIN <NOME>
+KEY-STRING <SENHA>
+
+EXIT
+
+<INTERFACE>{
+IP RIP AUTHENTICATION KEY-CHAIN <NOME>
+}
+
+
+
+
+Link State:
+Metricas mais eficientes e complexas(não usam so contagem de saltos)
+Estabelece vizinhanças com os routers vizinhos antes de iniciar o processo de envio;
+
+tem 3 tabelas de roteamento:
+Tabela de roteadores Vizinhos
+Tabela de Topologia logica da rede
+Tabela de roteamento.
+Ex: OSPF.
+
+
+Hybrid:
+
+Mix dos dois tipos acima.
+
+ex: EIGRP
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Protocolos destintos podem existir num mesmo ambiente mas NÃO CONVERSAM ENTRE SI.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
