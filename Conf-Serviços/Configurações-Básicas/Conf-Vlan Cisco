@@ -1,0 +1,12 @@
+####Conf-Vlan Cisco####
+
+
+# - Gerencia
+
+#conf t 
+#interface vlan <NUMERAL>
+#description <NOME>
+#ip address <IP> <MASCARA>			
+
+
+

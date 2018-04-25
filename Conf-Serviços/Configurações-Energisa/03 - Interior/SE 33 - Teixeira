@@ -1,0 +1,31 @@
+TEIXEIRA
+------------------------------------------------------------------------------------------
+set interfaces ethernet eth0 vif 283 address 172.16.252.218/30
+set interfaces ethernet eth1 vif 273 address 172.16.252.130/30
+set interfaces ethernet eth2 address 172.27.5.188/26
+set interfaces loopback lo
+
+set policy route-map eBGP-BACKUP rule 10 action permit
+set policy route-map eBGP-BACKUP rule 10 set local-preference 50
+
+set protocols bgp 64633 neighbor 172.16.252.129 remote-as 64000
+set protocols bgp 64633 neighbor 172.16.252.217 remote-as 64000
+set protocols bgp 64633 neighbor 172.16.252.217 route-map import eBGP-PRINCIPAL
+set protocols bgp 64633 network 10.255.253.27/32
+set protocols bgp 64633 network 172.27.5.128/26
+set protocols bgp 64633 parameters router-id 172.27.5.188
+set protocols static route 10.255.253.27/32 next-hop 172.27.5.129
+
+set service gui https-port 443
+set service ssh port 22
+set service ssh protocol-version v2
+set service telnet port 23
+
+set system host-name Teixeira-SE
+set system login user sitecnet authentication plaintext-password @cc355#s1t3c 
+set system login user sitecnet level admin
+set system syslog global facility all level notice
+set system syslog global facility protocols level debug
+set system time-zone UTC
+------------------------------------------------------------------------------------------
+

@@ -1,0 +1,134 @@
+hostname="srv-jpa-01"
+keymap="br275.iso.acc.kbd"
+ifconfig_em0="DHCP"
+sshd_enable="YES"
+dumpdev="NO"
+
+#defaultrouter="187.33.239.141"
+gateway_enable="YES"
+
+
+
+# HABILITANDO QUAGGA
+# -----------------------------------------------------------------------------------
+quagga_enable="YES"
+quagga_daemons="zebra ospfd bgpd"
+# -----------------------------------------------------------------------------------
+
+
+
+# HABILITANDO IPSec
+# -----------------------------------------------------------------------------------
+gateway_enable="YES"
+ipsec_enable="YES"
+ipsec_program="/usr/local/sbin/setkey"
+ipsec_file="/usr/local/etc/racoon/spd.conf"
+racoon_enable="yes"
+#racoon_flags="-l /var/log/racoon.log"
+# -----------------------------------------------------------------------------------
+
+
+
+# ROTAS ESTATICAS
+# -----------------------------------------------------------------------------------
+static_routes="net1 net2 net3 net4"
+route_net1="-net 177.75.76.154/32 187.33.239.141"
+route_net2="-net 187.33.237.46/32 187.33.239.141"
+route_net3="-net 10.4.2.86/32 187.33.239.141"
+route_net4="-net 187.33.239.198/32 187.33.239.141"
+# -----------------------------------------------------------------------------------
+
+
+
+# HABILITANTO GRE
+# -----------------------------------------------------------------------------------
+#gre_enable="YES"
+# -----------------------------------------------------------------------------------
+
+
+
+# HABILITANDO INTERFACES FISICAS
+# -----------------------------------------------------------------------------------
+ifconfig_giga0="up"
+ifconfig_giga1="up"
+ifconfig_giga2="up"
+ifconfig_giga3="up"
+ifconfig_giga4="up"
+ifconfig_giga5="up"
+ifconfig_ix0="up"
+# -----------------------------------------------------------------------------------
+
+
+
+# RENOMEANDO INTERFACES FISICAS (CONFIG DEFAUL COM IDS FORA DE ORDEM)
+# -----------------------------------------------------------------------------------
+ifconfig_igb0_name="giga4"
+ifconfig_igb1_name="giga5"
+ifconfig_igb2_name="giga0"
+ifconfig_igb3_name="giga1"
+ifconfig_igb4_name="giga2"
+ifconfig_igb5_name="giga3"
+# -----------------------------------------------------------------------------------
+
+
+
+# HABILITANDO CARP (FHRP)
+# -----------------------------------------------------------------------------------
+ifconfig_giga5="vhid 1 pass energisa 192.168.180.88/24"
+# -----------------------------------------------------------------------------------
+
+
+
+# HABILITANDO INTERFACES VLAN
+# -----------------------------------------------------------------------------------
+cloned_interfaces="vlan247 vlan405 vlan1121 vlan2950 vlan2955 vlan2960 vlan2953 vlan2954 bridge0 bridge1" 
+# -----------------------------------------------------------------------------------
+
+
+
+# CONECTIVIDADE COM SERVIDORES DA REDE ENERGISA
+# -----------------------------------------------------------------------------------
+# SERVIDOR-02 JPA
+ifconfig_vlan405="inet 10.21.10.17/30 vlan 405 vlandev giga4"
+
+# SERVIDOR-02 JPA (CONECTIVIDADE DE BACKUP VIA GIGA5)
+ifconfig_giga5_alias0="inet 10.31.0.1 netmask 255.255.255.0"
+# -----------------------------------------------------------------------------------
+
+
+
+# CONECTIVIDADE VPN-L3-ENERGISA COM SW-L3-JPA-ST-01
+# -----------------------------------------------------------------------------------
+ifconfig_vlan247="inet 172.16.255.2/30 vlan 247 vlandev ix0"
+# -----------------------------------------------------------------------------------
+
+
+
+# CONECTIVIDADE VPN-L3-ENERGISA COM CCR-JPA-ST-01 
+# -----------------------------------------------------------------------------------
+ifconfig_vlan1121="inet 172.16.255.22/30 vlan 1121 vlandev ix0"
+# -----------------------------------------------------------------------------------
+
+
+ 
+# GERENCIA 'SERVIDOR-01 JPA'
+# -----------------------------------------------------------------------------------
+ifconfig_vlan2950="inet 187.33.239.142/30 vlan 2950 vlandev ix0"
+# -----------------------------------------------------------------------------------
+
+#LAC SBTP
+# ------------------------------------------------------------------------------------
+ifconfig_vlan2955="vlan 2955 vlandev ix0"
+ifconfig_vlan2953="vlan 2953 vlandev giga1"
+ifconfig_bridge0="addm vlan2955 addm vlan2953 up"
+
+ifconfig_vlan2960="vlan 2960 vlandev ix0"
+ifconfig_vlan2954="vlan 2954 vlandev giga1"
+ifconfig_bridge1="addm vlan2960 addm vlan2954 up"
+# -----------------------------------------------------------------------------------
+
+#SERVIDOR GERENCIA ENERGISA
+# -----------------------------------------------------------------------------------
+ifconfig_vlan1892="vlan 1892 vlandev ix0"
+ifconfig_bridge2=" addm vlan1892 addm giga2 up"
+# -----------------------------------------------------------------------------------

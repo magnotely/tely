@@ -1,0 +1,23 @@
+####Conf-Vlan Extreme####
+
+
+#-Gerencia;
+create vlan <NOME> tag <NUMERAL>
+configure vlan <NOME> ipaddress <IP/MASCARA>
+enable ipfowarding vlan <NOME>
+configure vlan <NOME> add ports < N°DAS PORTAS> tagged(TRUNK)  ou untagged(ACCESS)
+
+#-Internet*¹:
+create vlan <NOME> vr "INTERNET" tag <NUMERAL>
+configure vlan <NOME> ipaddress <IP/MASCARA>
+enable ipfowarding vlan <NOME>
+configure vlan <NOME> add ports <N° DAS PORTAS> tagged(TRUNK)  ou untagged(ACCESS)
+configure iproute add <IP DE REDE DO BLOCO/MASCARA> <IP DO P2P DA RB> vr "INTERNET"
+
+show vlan tag <NUMERAL> #vê os dados da vlan (se existir)
+show configuration | inc(include) "COMANDO"(ip, vlan, etc)
+
+
+INFO:
+
+*¹ - Em caso de só passar a vlan no sw, apenas criar a vlan, SEM IP E NA VR DEFAULT.

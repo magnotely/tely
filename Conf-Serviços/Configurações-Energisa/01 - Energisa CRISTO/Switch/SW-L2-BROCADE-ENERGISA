@@ -1,0 +1,177 @@
+Building running configuration. Please wait...
+!<stackingDB>00</stackingDB>
+!<stackingMac>01_74-8e-f8-6f-90-f0_01</stackingMac>
+!
+
+!
+
+!
+!
+prompt SW-L2-JPA-EN-01
+!
+!
+!
+!
+!
+!
+!
+snmp-server community s1m_isp ro
+!
+snmp-server enable traps authentication
+!
+!
+username admin access-level 15
+username admin password 7 21232f297a57a5a743894a0e4a801fc3           
+username sitecnet access-level 15
+username sitecnet password 7 5a33dd62158e3e2863db01400b21073f
+enable password 7 1b3231655cebb7a1f783eddf27d254ca
+!
+!
+!
+!
+!
+!
+!
+!
+!
+vlan database
+ VLAN 1 name DefaultVlan media ethernet state active
+ VLAN 2953 name P2P-01-SWL3-JPA-ST-01 media ethernet state active
+ VLAN 2954 name LAC-JPA-SBTP-ENERGISA media ethernet state active
+!
+!
+!
+!
+!
+!
+spanning-tree mst configuration                                      
+ mst 0 priority 4096
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!                                                                    
+!
+!
+!
+interface ethernet 1/1
+ switchport allowed vlan add 1 untagged
+ switchport mode trunk
+ switchport allowed vlan add 1,2953-2954 tagged
+!
+interface ethernet 1/2
+ switchport allowed vlan add 1 untagged
+ switchport mode trunk
+ switchport allowed vlan add 1,2953-2954 tagged
+!
+interface ethernet 1/3
+ switchport allowed vlan add 2954 untagged
+ switchport native vlan 2954
+ switchport allowed vlan remove 1
+ switchport mode access
+!
+interface ethernet 1/4
+!
+interface ethernet 1/5
+!                                                                    
+interface ethernet 1/6
+!
+interface ethernet 1/7
+!
+interface ethernet 1/8
+!
+interface ethernet 1/9
+!
+interface ethernet 1/10
+!
+interface ethernet 1/11
+!
+interface ethernet 1/12
+!
+!
+!
+!
+interface vlan 1
+ ip address dhcp
+!
+interface vlan 2953
+ ip address 10.132.5.166 255.255.255.252
+!                                                                    
+!
+!
+!
+interface craft
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip route 0.0.0.0 0.0.0.0 10.132.5.165
+!
+!
+!
+!
+spanning-tree priority 4096
+!
+!                                                                    
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface vlan 1
+!
+interface vlan 2953                                                  
+!
+!
+!
+!
+!
+!
+!
+line console
+!
+!
+line vty
+!
+!
+!
+end

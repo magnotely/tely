@@ -1,0 +1,17 @@
+Current configuration:
+!
+hostname srv-jpa-02
+password zebra
+enable password zebra
+!
+ip route 10.255.253.1/32 192.168.180.81
+ip route 10.255.253.2/32 192.168.180.82
+ip route 172.27.15.128/26 192.168.180.95
+ip route 187.33.237.46/32 172.16.255.5
+!
+ip forwarding
+!
+!
+line vty
+!
+end

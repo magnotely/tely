@@ -1,0 +1,22 @@
+####VPWS####
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+[CRIE A VLAN(AQUI O VENDOR É O EXTREME)]:
+
+create vlan <NOME>
+configure vlan <NOME> description STRING 
+configure vlan <NOME> tag <NUMERAL>
+configure vlan <NOME> add ports <N° DA(S) PORTAS> tagged  
+disable igmp snooping*¹ vlan <NOME>
+create l2vpn vpws <NOME DA VPWS> fec-id-type pseudo-wire <TAG VLAN>
+configure l2vpn vpws <NOME DA VPWS> add service vlan <NOME>
+configure l2vpn vpws <NOME DA VPWS> dot1q tag include
+configure l2vpn vpws <NOME DA VPWS> add peer <LOOPBACK DA CAIXA QUE SERA APONTADA>
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+INFO:
+*¹ - O snooping IGMP é o processo de escutar o tráfego de rede do "Internet Group Management Protocol" (IGMP). O recurso permite que um comutador de rede(SWITCH) ouça a conversa IGMP entre hosts e roteadores. Ao ouvir essas conversas, o switch mantém um mapa de quais links precisam de quais fluxos multicast IP. Os multicasts podem ser filtrados dos links que não precisam deles e, portanto, controlam quais portas recebem tráfego multicast específico.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

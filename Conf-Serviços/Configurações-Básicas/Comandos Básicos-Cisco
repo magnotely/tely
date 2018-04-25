@@ -1,0 +1,173 @@
+Modo Usuário – Permite apenas a visualização de informações relacionadas ao switch, não permitindo que o mesmo seja configurado:
+Switch>
+
+Modo Privilegiado – Permite visualizar o estado do switch e importar/exportar imagens do IOS:
+Switch#
+
+Modo de Configuração Global – Permite configurar o Switch:
+Switch(config)#
+
+Geralmente, quando acessamos um roteador ou switch, entramos no modo usuário (Switch>). Para acessar o Modo Privilegiado, basta digitar enable ou en.
+
+A partir do Modo Privilegiado, podemos acessar o Mode de Configuração Global, para isso basta digitar configure terminal, ou conf t.
+
+Para sair do Modo de Configuração Global, podemos digitar exit ou end.
+
+Para sair do Modo Privilegiado, podemos digitar disable.
+
+Configurando o hostname do Switch:
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#hostname [HOSTNAME]
+Switch(config)#end
+Switch_TI#
+
+Exemplo:
+Switch(config)#hostname Switch_TI
+Switch_TI(config)#end
+Switch_TI#
+
+Configurar ou alterar a senha do modo privilegiado:
+Switch#conf t
+Switch(config)#enable secret [PASSWORD]
+Switch(config)#end
+Switch#
+
+Exemplo:
+Switch#conf t
+Switch(config)#enable secret Senha123
+Switch(config)#end
+Switch#
+
+Configurando o endereço IP do switch:
+Switch>enable
+Switch#conf t
+Switch(config)#interface vlan 1
+Switch(config-if)#ip address [IP] [MASK]
+Switch(config-if)#no shutdown
+
+Exemplo:
+Switch(config-if)#ip address 192.168.1.100 255.255.255.0
+
+Configurando o gateway do switch:
+Switch>enable
+Switch#conf t
+Switch(config)#ip default-gateway [IP]
+
+Exemplo:
+Switch(config)#ip default-gateway 192.168.1.1
+
+Criando uma VLAN no switch:
+Switch>enable
+Switch#configure terminal
+Switch(config)#vlan [ID]
+Switch(config-vlan)#name [NAME]
+Switch(config-vlan)#exit
+Switch(config)#
+
+Exemplo:
+Switch(config)#vlan 10
+Switch(config-vlan)#name VLAN-TI
+Switch(config-vlan)#exit
+
+Configurando uma interface em determinada VLAN:
+Switch(config)#interface [INTERFACE]
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan [ID]
+Switch(config-if)#end
+Switch#
+
+Exemplo:
+Switch(config)#interface fastEthernet 0/1
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#no shut
+Switch(config-if)#end
+Switch#
+
+Configurando uma interface no modo Trunk:
+Switch>enable
+Switch#configure terminal
+Switch(config)#interface [INTERFACE]
+Switch(config-if)#switchport mode trunk
+Switch(config-if)#no shut
+Switch(config-if)#end
+Switch#
+
+Exemplo:
+Switch>enable
+Switch#configure terminal
+Switch(config)#interface fa0/1
+Switch(config-if)#switchport mode trunk
+Switch(config-if)#no shut
+Switch(config-if)#end
+Switch#
+
+Portas FastEthernet ou 100 mbps começam com o prefixo Fa. Portas Gigabit ou 1000 mbps começam com o prefixo Gi.
+
+Também é possível configurar diversas interfaces simultaneamente. Por exemplo, para configurar as interfaces FastEthernet 0/1 a FastEthernet 0/10 na VLAN 10, os comandos seriam:
+
+Switch(config)#interface range fa 0/1-10
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#no shut
+Switch(config-if)#end
+Switch#
+
+Configurar um banner:
+Switch(config)# banner motd [CARACTERE_DELIMITADOR]
+[BANNER]
+[CARACTERE_DELIMITADOR]
+
+Exemplo:
+Switch(config)#banner motd $
+Enter TEXT message. End with the character ‘$’.
+
+**************************************
+Acesso restrito a pessoas autorizadas.
+**************************************
+
+$
+Switch(config)#end
+Switch#
+
+Comandos de verificação e diagnóstico:
+
+Exibir a lista dos comandos show disponíveis:
+Switch#show ?
+ou
+Switch#sh ?
+
+Exibir a tabela ARP do Switch:
+Switch#show arp
+
+Exibir a tabela MAC do Switch:
+Switch#show mac address-table
+
+Exibir um sumário das configurações das interfaces:
+Switch #sh ip interface brief
+
+Exibir detalhes de todas as interfaces do Switch:
+Switch #sh interfaces
+
+Para verificar detalhes de uma interface específica, por exemplo, Fa0/1, o comando é:
+Switch#sh interfaces fa0/1
+
+Exibir as vlans configuradas:
+Switch#show vlan brief
+
+Verificar as configurações ativas na memória RAM:
+Switch #sh running-config
+
+Verificar as configurações da NVRAM:
+Switch#sh startup-config
+
+Verificar os arquivos de sistema operacional da Flash:
+Switch#sh flash:
+
+Salvar as configurações ativas na RAM para a NVRAM:
+Switch#copy running-config startup-config
+ou
+Switch#wr
+

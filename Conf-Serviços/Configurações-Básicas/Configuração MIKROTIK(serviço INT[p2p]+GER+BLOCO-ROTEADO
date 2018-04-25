@@ -1,0 +1,50 @@
+####Configuração MIKROTIK(serviço INT[p2p]+GER+BLOCO-ROTEADO####
+
+@criar as vlans:
+vlan-<numero>-GERENCIA
+colocar tag
+vlan-<numero>-INTERNET
+colocar tag
+
+@criar bridge
+nome: BRIDGE - portas de 2 a 5
+
+@colocar IPs:
+p2p-gerencia/mascara na vlan-<numeral>-GERENCIA
+p2p-internet(P2P)/mascara na vlan-<numeral>-INTERNET
+gw-bloco ROTEADO ip/mascara na BRIDGE
+ 
+@criar rotas:
+ip > routes:
+criar vrf
+VRF-CLIENTE
+interfaces: bridge e vlan-<numero>-INTERNET
+import route targets: 10:10
+add route: 
+gw-gerencia: ip-gw(gerencia)
+gw-internet: ip-gw(internet) > routing mark: VRF-CLIENTE
+
+@comunity snmp:
+ip >SNMP
+communities: s1m_isp
+enable
+trap community: s1m_isp
+trap version: 2
+
+@criar usuário:
+system:
+identify: nome do cliente
+password: linpus-20500
+
+INFO:
+
+Indiferente da configuração relativa a este Vendor(RB mikrotik), lembre-se que INDIFERENTE DELE o serviço de internet ao cliente é entregue seguindo a mesma ordem:
+
+=============
+@criar as vlans;
+@criar bridge;
+@colocar IPs;
+@criar rotas;
+@comunity snmp;
+@criar usuário;
+=============

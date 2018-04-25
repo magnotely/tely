@@ -1,0 +1,26 @@
+BESSA
+------------------------------------------------------------------------------------------
+set interfaces ethernet eth0 address 192.168.1.1/24
+set interfaces ethernet eth1 vif 222 address 172.16.252.30/30
+set interfaces ethernet eth2 address 172.27.7.188/26
+set interfaces loopback lo
+
+set protocols bgp 64608 neighbor 172.16.252.29 remote-as 64000
+set protocols bgp 64608 network 10.255.253.35/32
+set protocols bgp 64608 network 172.27.7.128/26
+set protocols bgp 64608 parameters router-id 172.27.7.188
+set protocols static route 10.255.253.35/32 next-hop 172.27.7.129
+
+set service gui https-port 443
+set service ssh port 22
+set service ssh protocol-version v2
+set service telnet port 23
+
+set system host-name Bessa
+set system login user sitecnet authentication plaintext-password @cc355#s1t3c
+set system login user sitecnet level admin
+set system syslog global facility all level notice
+set system syslog global facility protocols level debug
+set system time-zone UTC
+------------------------------------------------------------------------------------------
+

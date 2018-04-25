@@ -1,0 +1,25 @@
+Current configuration:
+!
+hostname bgpd
+password zebra
+log stdout
+!
+router bgp 64692
+ bgp router-id 187.33.254.114
+ redistribute connected route-map REDISTRIBUICAO-PARA-BGP
+ redistribute static route-map REDISTRIBUICAO-PARA-BGP
+ neighbor 10.21.10.17 remote-as 64691
+ neighbor 172.16.255.5 remote-as 64000
+ neighbor 172.16.255.25 remote-as 64000
+!
+ip prefix-list PREFIXOS-ENERGISA seq 10 permit 10.255.253.0/24 le 32
+ip prefix-list PREFIXOS-ENERGISA seq 20 permit 192.168.180.0/24 le 32
+ip prefix-list PREFIXOS-ENERGISA seq 30 permit 172.27.15.128/26 le 32
+ip prefix-list PREFIXOS-ENERGISA seq 90 deny 0.0.0.0/0 le 32
+!
+route-map REDISTRIBUICAO-PARA-BGP permit 10
+ match ip address prefix-list PREFIXOS-ENERGISA
+!
+line vty
+!
+end
